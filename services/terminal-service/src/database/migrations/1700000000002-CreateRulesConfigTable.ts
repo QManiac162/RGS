@@ -9,7 +9,7 @@ export class CreateRulesConfigTable1700000000002 implements MigrationInterface{
             "value" VARCHAR(255) NOT NULL,
             "description" VARCHAR(500) NULL,
             "active" BOOLEAN NOT NULL DEFAULT true,
-            "updated_at" TIMESTAMPZ NOT NULL DEFAULT now(),
+            "updated_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
             CONSTRAINT "PK_rules_config_rule_key" PRIMARY KEY ("rule_key")
         );`);
     }

@@ -3,17 +3,17 @@ import { Entity, PrimaryColumn, Column, UpdateDateColumn } from 'typeorm';
 @Entity('rules_config')
 export class RuleConfig {
     @PrimaryColumn({ name: 'rule_key', type: 'varchar', length: 100 })
-    ruleKey: string;
+    ruleKey!: string;
 
     @Column({ type: 'varchar', length: 255 })
-    value: string;
+    value!: string;
 
     @Column({ type: 'varchar', length: 500, nullable: true })
-    description: string | null;
+    description!: string | null;
 
     @Column({ type: 'boolean', default: true })
-    active: boolean;
+    active!: boolean;
 
-    @UpdateDateColumn({ name: 'updated_at', type: 'timestampz' })
-    updatedAt: Date;
+    @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+    updatedAt!: Date;
 }

@@ -1,26 +1,26 @@
-import { Entity, PrimaryColumm, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { TerminalStatus } from './terminal-status.enum';
 
 @Entity('terminals')
 export class Terminal {
-    @PrimaryColumm({ type: 'varchar', length: 10 })
-    code: string;
+    @PrimaryColumn({ type: 'varchar', length: 10 })
+    code!: string;
 
     @Column({ type: 'varchar', length: 100 })
-    name: string;
+    name!: string;
 
-    @Column({ type: 'init'})
-    name: number;
+    @Column({ type: 'int' })
+    lanes!: number;
 
     @Column({ type: 'enum', enum: TerminalStatus, default: TerminalStatus.ACTIVE })
-    status: TerminalStatus;
+    status!: TerminalStatus;
 
-    @Column({ name: 'opens_at', type: 'timestampz', nullable: true })
-    opensAt: Date | null;
+    @Column({ name: 'opens_at', type: 'timestamptz', nullable: true })
+    opensAt!: Date | null;
 
-    @CreateDateColumn({ name: 'created_at', type: 'timestampz' })
-    createdAt: Date;
+    @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+    createdAt!: Date;
 
-    @UpdateDateColumn({ name: 'updated_at', type: 'timestampz' })
-    updatedAt: Date;
+    @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+    updatedAt!: Date;
 }

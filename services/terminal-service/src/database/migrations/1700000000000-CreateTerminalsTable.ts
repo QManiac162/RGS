@@ -1,6 +1,6 @@
-import { MigrationIInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class CreateTerminalsTable1700000000000 implements MigrationIInterface {
+export class CreateTerminalsTable1700000000000 implements MigrationInterface {
     name = 'CreateTerminalsTable1700000000000';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
@@ -11,9 +11,9 @@ export class CreateTerminalsTable1700000000000 implements MigrationIInterface {
             "name" VARCHAR(100) NOT NULL,
             "lanes" INT NOT NULL,
             "status" "terminal_status_enum" NOT NULL DEFAULT 'ACTIVE',
-            "opens_at" TIMESTAMPZ NULL,
-            "created_at" TIMESTAMPZ NOT NULL DEFAULT now(),
-            "updated_at" TIMESTAMPZ NOT NULL DEFAULT now(),
+            "opens_at" TIMESTAMPTZ NULL,
+            "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
+            "updated_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
             CONSTRAINT "PK_terminals_code" PRIMARY KEY ("code")
         );`);
     }
