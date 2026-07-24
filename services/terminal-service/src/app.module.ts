@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import databaseConfig from './config/typeorm.config';
+import redisConfig from './redis/redis.config';
 import { HealthModule } from './health/health.module';
 import { TerminalsModule } from './terminals/terminals.module';
 import { RulesModule } from './rules/rules.module';
+import { RedisModule } from './redis/redis.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -16,6 +18,7 @@ import { RulesModule } from './rules/rules.module';
             useFactory: (configService: ConfigService) =>
                 configService.getOrThrow<TypeOrmModuleOptions>('database'),
         }),
+        RedisModule,
         HealthModule,
         TerminalsModule,
         RulesModule,
