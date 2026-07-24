@@ -3,7 +3,7 @@ import { RulesService } from './rules.service';
 import { RuleResponseDto } from './dto/rule-response.dto';
 
 @Controller('rules')
-export class RuleController{
+export class RulesController{
     constructor(private readonly rulesService: RulesService){}
 
     @Get()

@@ -29,16 +29,16 @@ interface RuleSeed {
 
 const RULE_SEED: RuleSeed[] = [
     { ruleKey: 'booking.window.max_days', value: '3', description: 'Max business days in advance a slot can be booked'},
-    { ruleKey: 'booking.window.cutoff_hours', value: '2', description: 'Minimum '},
+    { ruleKey: 'booking.window.cutoff_hours', value: '2', description: 'Minimum notice in hours before a slot start time'},
     { ruleKey: 'capacity.max_per_hour.IRN', value: '40', description: 'Max Appointments per hour at IronGate'},
     { ruleKey: 'capacity.max_per_hour.STL', value: '25', description: 'Max Appointments per hour at Steelyard'},
     { ruleKey: 'capacity.max_per_hour.EMB', value: '15', description: 'Max Appointments per hour at Emberport'},
     { ruleKey: 'capacity.max_per_hour.SLT', value: '10', description: 'Max Appointments per hour at Slatedock'},
     { ruleKey: 'service.drop_and_pick.dual_slot', value: 'true', description: 'Whether drop & pickup consumes two capacity units'},
-    { ruleKey: 'noshow.grace_minutes', value: '', description: 'Grace period in minutes before an unattended appointment is auto-cancelled'},
-    { ruleKey: 'reschedule.min_notice_hours', value: '', description: 'Minimum notice in hours required to reschedule an appointment'},
-    { ruleKey: 'carrier.daily_quota', value: '', description: 'Max active appointments per carrier per day'},
-    { ruleKey: 'train.reservation.required', value: '', description: 'Whether a valid train reservation is required for an appointment'},
+    { ruleKey: 'noshow.grace_minutes', value: '60', description: 'Grace period in minutes before an unattended appointment is auto-cancelled'},
+    { ruleKey: 'reschedule.min_notice_hours', value: '4', description: 'Minimum notice in hours required to reschedule an appointment'},
+    { ruleKey: 'carrier.daily_quota', value: '10', description: 'Max active appointments per carrier per day'},
+    { ruleKey: 'train.reservation.required', value: 'true', description: 'Whether a valid train reservation is required for an appointment'},
 ];
 
 const WINDOW_START_HOUR = 8;
