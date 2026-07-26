@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Terminal } from '../database/entities/terminal.entity';
@@ -14,6 +15,8 @@ export default registerAs(
         password: process.env.POSTGRES_PASSWORD,
         database: process.env.POSTGRES_DB,
         entities: [Terminal, CapacityWindow, RuleConfig],
+        migrations: [resolve(__dirname, '../database/migrations/*.{ts,js}')],
+        migrationsRun: true,
         synchronize: false,
         logging: process.env.NODE_ENV === 'development',
     }),

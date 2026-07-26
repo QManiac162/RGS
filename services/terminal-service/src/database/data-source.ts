@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { Terminal } from './entities/terminal.entity';
@@ -14,7 +15,8 @@ export const AppDataSource = new DataSource({
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DB,
     entities: [Terminal, CapacityWindow, RuleConfig],
-    migrations: [__dirname + '/migrations/*.{ts,js}'],
+    migrations: [resolve(__dirname, 'migrations/*.{ts,js}')],
+    migrationsRun: true,
     synchronize: false,
     logging: process.env.NODE_ENV === 'development',
 });

@@ -139,6 +139,9 @@ async function run(): Promise<void> {
     await AppDataSource.initialize();
     console.log(`[seed] data source initialized`);
 
+    await AppDataSource.runMigrations();
+    console.log(`[seed] migrations applied`);
+
     await seedTerminals();
     await seedCapacityWindows();
     await seedRules();

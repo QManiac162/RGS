@@ -11,7 +11,7 @@ import { RedisModule } from './redis/redis.module';
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: [databaseConfig],
+            load: [databaseConfig, redisConfig],
         }),
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],

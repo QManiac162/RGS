@@ -112,6 +112,31 @@ describe('CapacityLockService', () => {
       expect(redisService.releaseLock).toHaveBeenCalledWith(expect.stringContaining('lock:capacity:IRN:'), 'lock-token-abc');
     });
 
+    it('returns the existing availableSlots value on the reserve response', async () => {
+      terminalsService.findByCode.mockResolvedValue(activeTerminal);
+      const queryRunner = buildQueryRunner(buildWindow({ maxSlots: 16, bookedSlots: 3 }));
+      dataSource.createQueryRunner.mockReturnValue(queryRunner);
+      redisService.acquireLock.mockResolvedValue('lock-token-abc');
+
+      const result = await service.reserveCapacity('IRN', '2026-07-20T08:00:00.000Z', 2);
+
+      expect(result.availableSlots).toBe(11);
+    });
+
+    it('still releases the Redis lock when query-runner cleanup throws', async () => {
+      terminalsService.findByCode.mockResolvedValue(activeTerminal);
+      const queryRunner = buildQueryRunner(buildWindow({ bookedSlots: 3 }));
+      queryRunner.release.mockRejectedValueOnce(new Error('db cleanup failed'));
+      dataSource.createQueryRunner.mockReturnValue(queryRunner);
+      redisService.acquireLock.mockResolvedValue('lock-token-abc');
+
+      await expect(
+        service.reserveCapacity('IRN', '2026-07-20T08:00:00.000Z', 2),
+      ).resolves.toMatchObject({ bookedSlots: 5 });
+
+      expect(redisService.releaseLock).toHaveBeenCalledWith(expect.stringContaining('lock:capacity:IRN:'), 'lock-token-abc');
+    });
+
     it('throws CapacityExceededException and rolls back when units exceed availability', async () => {
       terminalsService.findByCode.mockResolvedValue(activeTerminal);
       const queryRunner = buildQueryRunner(buildWindow({ maxSlots: 16, bookedSlots: 15 }));

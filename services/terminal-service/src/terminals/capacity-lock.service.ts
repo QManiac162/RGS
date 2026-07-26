@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 import { DataSource } from "typeorm";
@@ -12,6 +12,8 @@ import { CapacityExceededException } from "./exceptions/capacity-exceeded.except
 
 @Injectable()
 export class CapacityLockService{
+    private readonly logger = new Logger(CapacityLockService.name);
+
     constructor(
         @InjectDataSource() private readonly dataSource: DataSource,
         private readonly redisService: RedisService,
@@ -60,11 +62,23 @@ export class CapacityLockService{
 
             return this.toDto(window);
         } catch(err){
-            await queryRunner.rollbackTransaction();
+            try{
+                await queryRunner.rollbackTransaction();
+            } catch (rollbackError) {
+                this.logger.warn(`Rollback failed for ${lockKey}: ${rollbackError instanceof Error ? rollbackError.message : rollbackError}`);
+            }
             throw err;
         } finally {
-            await queryRunner.release();
-            await this.redisService.releaseLock(lockKey, lockToken);
+            try {
+                await queryRunner.release();
+            } catch (releaseError) {
+                this.logger.warn(`Release failed for ${lockKey}: ${releaseError instanceof Error ? releaseError.message : releaseError}`);
+            }
+            try {
+                await this.redisService.releaseLock(lockKey, lockToken);
+            } catch (releaseLockError) {
+                this.logger.warn(`Redis lock release failed for ${lockKey}: ${releaseLockError instanceof Error ? releaseLockError.message : releaseLockError}`);
+            }
         }
     }
 
@@ -103,11 +117,23 @@ export class CapacityLockService{
 
             return this.toDto(window);
         } catch(err){
-            await queryRunner.rollbackTransaction();
+            try{
+                await queryRunner.rollbackTransaction();
+            } catch (rollbackError) {
+                this.logger.warn(`Rollback failed for ${lockKey}: ${rollbackError instanceof Error ? rollbackError.message : rollbackError}`);
+            }
             throw err;
         } finally {
-            await queryRunner.release();
-            await this.redisService.releaseLock(lockKey, lockToken);
+            try {
+                await queryRunner.release();
+            } catch (releaseError) {
+                this.logger.warn(`Release failed for ${lockKey}: ${releaseError instanceof Error ? releaseError.message : releaseError}`);
+            }
+            try {
+                await this.redisService.releaseLock(lockKey, lockToken);
+            } catch (releaseLockError) {
+                this.logger.warn(`Redis lock release failed for ${lockKey}: ${releaseLockError instanceof Error ? releaseLockError.message : releaseLockError}`);
+            }
         }
     }
 
@@ -148,7 +174,7 @@ export class CapacityLockService{
             windowEnd: window.windowEnd.toISOString(),
             maxSlots: window.maxSlots,
             bookedSlots: window.bookedSlots,
-            availableSlots: window.maxSlots-window.bookedSlots
+            availableSlots: window.maxSlots - window.bookedSlots
         };
     }
 }

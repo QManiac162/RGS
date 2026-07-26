@@ -80,7 +80,7 @@ export class TerminalsService{
             windowEnd: window.windowEnd.toISOString(),
             maxSlots: window.maxSlots,
             bookedSlots: window.bookedSlots,
-            availableSlots: window.maxSlots-window.bookedSlots,
+            availableSlots: window.maxSlots - window.bookedSlots,
         };
     }
 }
