@@ -40,7 +40,7 @@ describe('GanGeneratorService', () => {
     it('formats a small sequence number with zero-padding', async () =>{
         redisService.incrementSequence.mockResolvedValue(1);
         const gan = await service.generateNext('IRN', '2026-07-20');
-        expect(gan).toBe('GAN-IRN-20260720-000482');
+        expect(gan).toBe('GAN-IRN-20260720-000001');
     });
 
     it('formats a larger sequence number without truncation', async () =>{

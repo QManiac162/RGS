@@ -15,7 +15,7 @@ export class GanGeneratorService{
 
     async generateNext(terminalCode: string, dateStr: string): Promise<string> {
         const compactDate = dateStr.replace(/-/g, '');
-        const sequenceKey = `gan:seq${terminalCode}:${compactDate}`;
+        const sequenceKey = `gan:seq:${terminalCode}:${compactDate}`;
         const ttlSeconds = this.configService.get<number>('redis.ganSequenceTtlSeconds',)!;
         const sequence = await this.redisService.incrementSequence(sequenceKey, ttlSeconds);
         const paddedSequence = sequence.toString().padStart(6, '0');

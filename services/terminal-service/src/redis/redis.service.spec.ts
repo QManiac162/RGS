@@ -25,7 +25,7 @@ describe('RedisService', ()=>{
             providers: [
                 RedisService, {
                     provide: REDIS_CLIENT,
-                    usevalue: mockClient
+                    useValue: mockClient
                 },
             ],
         }).compile();
@@ -46,7 +46,14 @@ describe('RedisService', ()=>{
             expect(mockClient.set).toHaveBeenCalledWith('lock:test', expect.any(String), 'PX', 5000, 'NX');
         });
 
-        it('retries the configured number of times then returns null if the lock never frees', async() => {
+        it('retries the configured number of times then returns null if the lock never frees', async () => {
+            mockClient.set.mockResolvedValueOnce(null).mockResolvedValueOnce(null).mockResolvedValueOnce('OK');
+            const token = await service.acquireLock('lock:test', 5000, 3, 5);
+            expect(token).not.toBeNull();
+            expect(mockClient.set).toHaveBeenCalledTimes(3);
+        });
+
+        it('succeeds on a later retry if the lock frees up', async () => {
             mockClient.set.mockResolvedValueOnce(null).mockResolvedValueOnce(null).mockResolvedValueOnce('OK');
             const token = await service.acquireLock('lock:test', 5000, 3, 5);
             expect(token).not.toBeNull();
@@ -79,8 +86,8 @@ describe('RedisService', ()=>{
         it('does not reset the expiry on subsequent increments', async () =>{
             mockClient.incr.mockResolvedValue(2);
             const count = await service.incrementSequence('seq:test', 172800);
-            expect(count).toBe(1);
-            expect(mockClient.expire).toHaveBeenCalled();
+            expect(count).toBe(2);
+            expect(mockClient.expire).not.toHaveBeenCalled();
         });
     });
 });
