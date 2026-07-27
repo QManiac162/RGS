@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Fires N concurrent reservation requests against the same capacity window, each requesting the entire remaining capacity.
-# Because of the REDIS lock + Postgres transaction, exactly 1 request must sucdeed and all others must be rejected
+# Because of the REDIS lock + Postgres transaction, exactly one request must sucdeed and all others must be rejected
 # Never more capacity booked than exists
 
 set -euo pipefail
