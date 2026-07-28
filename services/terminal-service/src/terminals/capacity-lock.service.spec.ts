@@ -16,6 +16,15 @@ describe('CapacityLockService', () => {
   let terminalsService: { findByCode: jest.Mock };
   let redisService: { acquireLock: jest.Mock; releaseLock: jest.Mock };
 
+  const formatUtcDate = (date: Date): string => date.toISOString().slice(0, 10);
+  const today = new Date();
+  const dayStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  const todayDate = formatUtcDate(dayStart);
+  const todayWindowStartIso = `${todayDate}T08:00:00.000Z`;
+  const todayWindowEndIso = `${todayDate}T09:00:00.000Z`;
+  const todayLateWindowIso = `${todayDate}T23:00:00.000Z`;
+  const futureOpenDateIso = new Date(dayStart.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString();
+
   const activeTerminal = {
     code: 'IRN',
     name: 'Irongate',
@@ -36,8 +45,8 @@ describe('CapacityLockService', () => {
     return {
       id: 'window-uuid-1',
       terminalCode: 'IRN',
-      windowStart: new Date('2026-07-20T08:00:00.000Z'),
-      windowEnd: new Date('2026-07-20T09:00:00.000Z'),
+      windowStart: new Date(todayWindowStartIso),
+      windowEnd: new Date(todayWindowEndIso),
       maxSlots: 16,
       bookedSlots: 0,
       createdAt: new Date(),
@@ -103,7 +112,7 @@ describe('CapacityLockService', () => {
     //   // simulate successful lock
       redisService.acquireLock.mockResolvedValue('lock-token-abc');
 
-      const result = await service.reserveCapacity('irn', '2026-07-20T08:00:00.000Z', 2);
+      const result = await service.reserveCapacity('irn', todayWindowStartIso, 2);
 
       expect(result.bookedSlots).toBe(5);
       expect(result.availableSlots).toBe(11);
@@ -118,7 +127,7 @@ describe('CapacityLockService', () => {
       dataSource.createQueryRunner.mockReturnValue(queryRunner);
       redisService.acquireLock.mockResolvedValue('lock-token-abc');
 
-      const result = await service.reserveCapacity('IRN', '2026-07-20T08:00:00.000Z', 2);
+      const result = await service.reserveCapacity('IRN', todayWindowStartIso, 2);
 
       expect(result.availableSlots).toBe(11);
     });
@@ -131,7 +140,7 @@ describe('CapacityLockService', () => {
       redisService.acquireLock.mockResolvedValue('lock-token-abc');
 
       await expect(
-        service.reserveCapacity('IRN', '2026-07-20T08:00:00.000Z', 2),
+        service.reserveCapacity('IRN', todayWindowStartIso, 2),
       ).resolves.toMatchObject({ bookedSlots: 5 });
 
       expect(redisService.releaseLock).toHaveBeenCalledWith(expect.stringContaining('lock:capacity:IRN:'), 'lock-token-abc');
@@ -144,7 +153,7 @@ describe('CapacityLockService', () => {
       redisService.acquireLock.mockResolvedValue('lock-token-abc');
 
       await expect(
-        service.reserveCapacity('IRN', '2026-07-20T08:00:00.000Z', 5),
+        service.reserveCapacity('IRN', todayWindowStartIso, 2),
       ).rejects.toThrow(CapacityExceededException);
 
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
@@ -159,7 +168,7 @@ describe('CapacityLockService', () => {
       redisService.acquireLock.mockResolvedValue('lock-token-abc');
 
       await expect(
-        service.reserveCapacity('IRN', '2026-07-20T23:00:00.000Z', 1),
+        service.reserveCapacity('IRN', todayLateWindowIso, 1),
       ).rejects.toThrow(NotFoundException);
 
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
@@ -171,7 +180,7 @@ describe('CapacityLockService', () => {
       redisService.acquireLock.mockResolvedValue(null);
 
       await expect(
-        service.reserveCapacity('IRN', '2026-07-20T08:00:00.000Z', 1),
+        service.reserveCapacity('IRN', todayWindowStartIso, 1),
       ).rejects.toThrow(SlotLockBusyException);
 
       expect(dataSource.createQueryRunner).not.toHaveBeenCalled();
@@ -180,7 +189,7 @@ describe('CapacityLockService', () => {
     it('throws BadRequestException when the terminal is not yet operational', async () => {
       terminalsService.findByCode.mockResolvedValue(upcomingTerminal);
       await expect(
-        service.reserveCapacity('FLN', '2026-10-05T08:00:00.000Z', 1),
+        service.reserveCapacity('FLN', futureOpenDateIso, 1),
       ).rejects.toThrow(BadRequestException);
 
       expect(redisService.acquireLock).not.toHaveBeenCalled();
@@ -194,7 +203,7 @@ describe('CapacityLockService', () => {
       dataSource.createQueryRunner.mockReturnValue(queryRunner);
       redisService.acquireLock.mockResolvedValue('lock-token-abc');
 
-      const result = await service.releaseCapacity('IRN', '2026-07-20T08:00:00.000Z', 2);
+      const result = await service.releaseCapacity('IRN', todayWindowStartIso, 2);
 
       expect(result.bookedSlots).toBe(3);
       expect(queryRunner.commitTransaction).toHaveBeenCalled();
@@ -207,7 +216,7 @@ describe('CapacityLockService', () => {
       redisService.acquireLock.mockResolvedValue('lock-token-abc');
 
       await expect(
-        service.releaseCapacity('IRN', '2026-07-20T08:00:00.000Z', 3),
+        service.releaseCapacity('IRN', todayWindowStartIso, 3),
       ).rejects.toThrow(BadRequestException);
 
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();

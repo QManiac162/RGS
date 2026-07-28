@@ -2,7 +2,7 @@ import {Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColu
 import {ServiceType} from './service-type.enum';
 import { AppointmentStatus} from './appointment-status.enum';
 
-@Entity()
+@Entity('appointments')
 export class Appointment {
     @PrimaryGeneratedColumn('uuid')
     id!: string;

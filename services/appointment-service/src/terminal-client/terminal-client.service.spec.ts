@@ -12,6 +12,14 @@ describe('TerminalClientService', () => {
         get: jest.Mock;
     };
 
+    const formatUtcDate = (date: Date): string => date.toISOString().slice(0, 10);
+    const today = new Date();
+    const dayStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    const todayDate = formatUtcDate(dayStart);
+    const todayWindowStart = `${todayDate}T08:00:00Z`;
+    const todayWindowEnd = `${todayDate}T09:00:00Z`;
+    const tomorrowDate = formatUtcDate(new Date(dayStart.getTime() + 24 * 60 * 60 * 1000));
+
     beforeEach(async () => {
         httpService = {
             post: jest.fn(),
@@ -35,15 +43,15 @@ describe('TerminalClientService', () => {
             of({ 
                 data: { 
                     terminalCode: 'IRN',
-                    windowStart: '2026-07-20T08:00:00Z',
-                    windowEnd: '2026-07-20T09:00:00Z',
+                    windowStart: todayWindowStart,
+                    windowEnd: todayWindowEnd,
                     maxSlots: 16,
                     bookedSlots: 3,
                     availableSlots: 13 
                 } ,
             }),
         );
-        const result = await service.reserveCapacity('IRN', '2026-07-20T08:00:00Z', 1);
+        const result = await service.reserveCapacity('IRN', todayWindowStart, 1);
         expect(result.availableSlots).toBe(13);
     });
 
@@ -58,7 +66,7 @@ describe('TerminalClientService', () => {
             data: {statusCode: 409, error: 'CAPACITY_EXCEEDED', message: 'Requested 5 exceeds available'},
         });
         httpService.post.mockReturnValue(throwError(() => axiosError));
-        await expect(service.reserveCapacity('IRN', '2026-07-20T08:00:00Z', 5)).rejects.toMatchObject({ status: 409 });
+        await expect(service.reserveCapacity('IRN', todayWindowStart, 5)).rejects.toMatchObject({ status: 409 });
     });
 
     it('throws ServiceUnavailableException when there is no response at all', async () => {
@@ -68,8 +76,8 @@ describe('TerminalClientService', () => {
     });
 
     it('extract the gan string from the response', async () => {
-        httpService.get.mockReturnValue(of({ data: { gan: 'GAN-IRN-20260720-000001' } }));
-        const gan = await service.getNextGan('IRN', '2026-07-20');
-        expect(gan).toBe('GAN-IRN-20260720-000001');
+        httpService.get.mockReturnValue(of({ data: { gan: `GAN-IRN-${todayDate.replace(/-/g, '')}-000001` } }));
+        const gan = await service.getNextGan('IRN', todayDate);
+        expect(gan).toBe(`GAN-IRN-${todayDate.replace(/-/g, '')}-000001`);
     });
 });

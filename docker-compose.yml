@@ -106,8 +106,9 @@ services:
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
             APPOINTMENT_DB: ${APPOINTMENT_DB}
             TERMINAL_SERVICE_URL: http://terminal-service:3000
+            TERMINAL_CLIENT_BASE_URL: http://terminal-service:3000
             TERMINAL_CLIENT_TIMEOUT_MS: "5000"
-            RULES_CACHE_TTL_MS: "30000"
+            TERMINAL_CLIENT_RULES_CACHE_TTL_MS: "30000"
         ports:
           - "${APPOINTMENT_SERVICE_PORT}:3000"
         depends_on:

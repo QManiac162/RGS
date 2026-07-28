@@ -15,7 +15,8 @@
         "typeorm": "typeorm-ts-node-commonjs -d src/database/data-source.ts",
         "migration:run": "npm run typeorm -- migration:run",
         "migration:revert": "npm run typeorm -- migration:revert",
-        "migration:generate": "npm run typeorm -- migration:generate"
+        "migration:generate": "npm run typeorm -- migration:generate",
+        "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts"
     },
     "dependencies": {
         "@nestjs/axios": "^4.0.0",

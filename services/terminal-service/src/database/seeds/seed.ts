@@ -12,13 +12,21 @@ interface TerminalSeed{
     opensAt: Date | null;
 }
 
+const WINDOW_START_HOUR = 8;
+const WINDOW_END_HOUR = 18;
+const DAYS_TO_SEED = 3;
+const BASE_DATE = new Date();
+BASE_DATE.setUTCHours(0, 0, 0, 0);
+const UPCOMING_TERMINAL_OPEN_1 = new Date(BASE_DATE.getTime() + 60 * 24 * 60 * 60 * 1000);
+const UPCOMING_TERMINAL_OPEN_2 = new Date(BASE_DATE.getTime() + 120 * 24 * 60 * 60 * 1000);
+
 const TERMINAL_SEEDS: TerminalSeed[]=[
     { code: 'IRN', name: 'Irongate', lanes: 8, status: TerminalStatus.ACTIVE, opensAt: null },
     { code: 'STL', name: 'Steelyard', lanes: 6, status: TerminalStatus.ACTIVE, opensAt: null },
     { code: 'EMB', name: 'Emberport', lanes: 4, status: TerminalStatus.ACTIVE, opensAt: null },
     { code: 'SLT', name: 'Slatedock', lanes: 3, status: TerminalStatus.ACTIVE, opensAt: null },
-    { code: 'FLN', name: 'Flintbay', lanes: 5, status: TerminalStatus.UPCOMING, opensAt: new Date('2026-10-01T00:00:00.000Z') },
-    { code: 'ASH', name: 'Ashridge', lanes: 6, status: TerminalStatus.UPCOMING, opensAt: new Date('2026-12-01T00:00:00.000Z') },
+    { code: 'FLN', name: 'Flintbay', lanes: 5, status: TerminalStatus.UPCOMING, opensAt: UPCOMING_TERMINAL_OPEN_1 },
+    { code: 'ASH', name: 'Ashridge', lanes: 6, status: TerminalStatus.UPCOMING, opensAt: UPCOMING_TERMINAL_OPEN_2 },
 ];
 
 interface RuleSeed {
@@ -40,10 +48,6 @@ const RULE_SEED: RuleSeed[] = [
     { ruleKey: 'carrier.daily_quota', value: '10', description: 'Max active appointments per carrier per day'},
     { ruleKey: 'train.reservation.required', value: 'true', description: 'Whether a valid train reservation is required for an appointment'},
 ];
-
-const WINDOW_START_HOUR = 8;
-const WINDOW_END_HOUR = 18;
-const DAYS_TO_SEED = 3;
 
 function maxSlotsFor(lanes: number): number {
     return lanes*2;

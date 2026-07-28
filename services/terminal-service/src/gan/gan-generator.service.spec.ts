@@ -9,6 +9,14 @@ describe('GanGeneratorService', () => {
         incrementSequence: jest.Mock
     };
 
+    const formatUtcDate = (date: Date): string => date.toISOString().slice(0, 10);
+    const today = new Date();
+    const dayStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    const todayDate = formatUtcDate(dayStart);
+    const todayCompactDate = todayDate.replace(/-/g, '');
+    const tomorrowDate = formatUtcDate(new Date(dayStart.getTime() + 24 * 60 * 60 * 1000));
+    const tomorrowCompactDate = tomorrowDate.replace(/-/g, '');
+
     beforeEach(async () => {
         redisService = {
             incrementSequence: jest.fn()
@@ -39,19 +47,19 @@ describe('GanGeneratorService', () => {
 
     it('formats a small sequence number with zero-padding', async () =>{
         redisService.incrementSequence.mockResolvedValue(1);
-        const gan = await service.generateNext('IRN', '2026-07-20');
-        expect(gan).toBe('GAN-IRN-20260720-000001');
+        const gan = await service.generateNext('IRN', todayDate);
+        expect(gan).toBe(`GAN-IRN-${todayCompactDate}-000001`);
     });
 
     it('formats a larger sequence number without truncation', async () =>{
         redisService.incrementSequence.mockResolvedValue(482);
-        const gan = await service.generateNext('IRN', '2026-07-20');
-        expect(gan).toBe('GAN-IRN-20260720-000482');
+        const gan = await service.generateNext('IRN', todayDate);
+        expect(gan).toBe(`GAN-IRN-${todayCompactDate}-000482`);
     });
 
     it('calls incrementSequence with a key scoped to terminal and date', async () =>{
         redisService.incrementSequence.mockResolvedValue(1);
-        await service.generateNext('STL', '2026-07-21');
-        expect(redisService.incrementSequence).toHaveBeenCalledWith('gan:seq:STL:20260721', 172800);
+        await service.generateNext('STL', tomorrowDate);
+        expect(redisService.incrementSequence).toHaveBeenCalledWith(`gan:seq:STL:${tomorrowCompactDate}`, 172800);
     });
 });

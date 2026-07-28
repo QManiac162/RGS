@@ -10,7 +10,7 @@ export const AppDataSource = new DataSource({
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
     username: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DB,
+    database: process.env.APPOINTMENT_DB,
     entities: [Appointment],
     migrations: [__dirname + '/migrations/*.{ts,js}'],
     synchronize: false,

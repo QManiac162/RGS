@@ -29,6 +29,13 @@ describe('AppointmentsService', () => {
     getRequiredBoolean: jest.Mock;
   };
 
+  const formatUtcDate = (date: Date): string => date.toISOString().slice(0, 10);
+  const formatCompactDate = (date: Date): string => formatUtcDate(date).replace(/-/g, '');
+  const today = new Date();
+  const todayStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  const todayDate = formatUtcDate(todayStart);
+  const todayCompactDate = formatCompactDate(todayStart);
+
   const RULES: Record<string, number | boolean> = {
     'booking.window.cutoff_hours': 2,
     'booking.window.max_days': 3,
@@ -69,7 +76,7 @@ describe('AppointmentsService', () => {
     terminalClient = {
       reserveCapacity: jest.fn().mockResolvedValue({}),
       releaseCapacity: jest.fn().mockResolvedValue({}),
-      getNextGan: jest.fn().mockResolvedValue('GAN-IRN-20260720-000001'),
+      getNextGan: jest.fn().mockResolvedValue(`GAN-IRN-${todayCompactDate}-000001`),
     };
 
     rulesCache = {
@@ -97,7 +104,7 @@ describe('AppointmentsService', () => {
     const dto = { ...baseDto, scheduledStart: hoursFromNow(5).toISOString() };
     const result = await service.createAppointment(dto as any);
 
-    expect(result.gan).toBe('GAN-IRN-20260720-000001');
+    expect(result.gan).toBe(`GAN-IRN-${todayCompactDate}-000001`);
     expect(result.status).toBe(AppointmentStatus.CONFIRMED);
     expect(result.unitsReserved).toBe(1);
     expect(terminalClient.reserveCapacity).toHaveBeenCalledWith('IRN', dto.scheduledStart, 1);
@@ -181,7 +188,7 @@ describe('AppointmentsService', () => {
   describe('findByGan', () => {
     it('returns a mapped DTO when the appointment exists', async () => {
       repo.findOne.mockResolvedValue({
-        gan: 'GAN-IRN-20260720-000001',
+        gan: `GAN-IRN-${todayCompactDate}-000001`,
         carrierId: 'CARRIER-1',
         terminalCode: 'IRN',
         serviceType: ServiceType.DROP_OFF,
@@ -195,8 +202,9 @@ describe('AppointmentsService', () => {
         createdAt: new Date(),
       });
 
-      const result = await service.findByGan('GAN-IRN-20260720-000001');
-      expect(result.gan).toBe('GAN-IRN-20260720-000001');
+      const ganString = `GAN-IRN-${todayCompactDate}-000001`;
+      const result = await service.findByGan(ganString);
+      expect(result.gan).toBe(ganString);
     });
 
     it('throws NotFoundException when no appointment matches the GAN', async () => {

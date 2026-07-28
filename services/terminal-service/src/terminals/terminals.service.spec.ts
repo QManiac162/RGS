@@ -19,6 +19,13 @@ describe('TerminalsService', () => {
     let terminalRepo: MockRepo<Terminal>;
     let capacityRepo: MockRepo<CapacityWindow>;
 
+    const formatUtcDate = (date: Date): string => date.toISOString().slice(0, 10);
+    const today = new Date();
+    const dayStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    const todayDate = formatUtcDate(dayStart);
+    const todayWindowStartIso = `${todayDate}T08:00:00Z`;
+    const futureOpenDate = new Date(dayStart.getTime() + 60 * 24 * 60 * 60 * 1000);
+
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -101,7 +108,7 @@ describe('TerminalsService', () => {
     describe('getCapacityForDate', () => {
         it('throws notFoundException when terminal does not exist', async () =>{
             terminalRepo.findOne!.mockResolvedValue(null);
-            await expect(service.getCapacityForDate('ZZZ', '2026-07-20')).rejects.toThrow(NotFoundException);
+            await expect(service.getCapacityForDate('ZZZ', todayDate)).rejects.toThrow(NotFoundException);
         });
 
         it('throws BadRequestException when terminal is UPCOMING', async () =>{
@@ -110,9 +117,9 @@ describe('TerminalsService', () => {
                 name: 'Flintbay',
                 lanes: 5,
                 status: TerminalStatus.UPCOMING,
-                opensAt: new Date('2026-10-01T00:00:00Z'),
+                opensAt: futureOpenDate,
             });
-            await expect(service.getCapacityForDate('FLN', '2026-07-20')).rejects.toThrow(BadRequestException);
+            await expect(service.getCapacityForDate('FLN', todayDate)).rejects.toThrow(BadRequestException);
         });
 
         it('throws BadRequestException for an invalid date value', async () => {
@@ -138,14 +145,14 @@ describe('TerminalsService', () => {
                 {
                     id: 'uuid-1',
                     terminalCode: 'IRN',
-                    windowStart: new Date('2026-07-20T08:00:00Z'),
-                    windowEnd: new Date('2026-07-20T09:00:00Z'),
+                    windowStart: new Date(todayWindowStartIso),
+                    windowEnd: new Date(todayWindowStartIso.replace('08:00:00Z', '09:00:00Z')),
                     maxSlots: 16,
                     bookedSlots: 3,
                 },
             ]);
 
-            const result = await service.getCapacityForDate('IRN', '2026-07-20');
+            const result = await service.getCapacityForDate('IRN', todayDate);
             expect(result).toHaveLength(1);
             expect(result[0].availableSlots).toBe(13);
         });
